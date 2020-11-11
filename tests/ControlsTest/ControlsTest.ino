@@ -38,13 +38,17 @@ void setup() {
 }
 
 byte ledState = true;
+byte i = 0;
 void loop() {
-  if (!!ledState) {
-    digitalWrite(LED_1, HIGH);
-    digitalWrite(LED_2, LOW);
-  } else {
-    digitalWrite(LED_1, LOW);
-    digitalWrite(LED_2, HIGH);
+  for (i = 0; i < 256; i++) {
+    if (!!ledState) {
+      analogWrite(LED_1, i);
+      analogWrite(LED_2, 255 - i);
+    } else {
+      analogWrite(LED_1, 255 - i);
+      analogWrite(LED_2, i);
+    }
+    delay(4);
   }
   ledState = !ledState;
   
@@ -73,6 +77,4 @@ void loop() {
   Serial.println(analogRead(KNOB_5));
   Serial.print("Knob 6: ");
   Serial.println(analogRead(KNOB_6));
-  
-  delay(1000);
 }

@@ -8,20 +8,16 @@
  */
 
 #include <MIDI.h>
-
 MIDI_CREATE_DEFAULT_INSTANCE();
 
 #define LED_1 11
-#define LED_2 6
 
 void setup() {
   MIDI.setHandleNoteOn(receiveNoteOn);
   MIDI.setHandleNoteOff(receiveNoteOff);
-  MIDI.setHandleControlChange(receiveControlChange);
   MIDI.begin(MIDI_CHANNEL_OMNI);
   
   pinMode(LED_1, OUTPUT);
-  pinMode(LED_2, OUTPUT);
 }
 
 void loop() {
@@ -29,13 +25,9 @@ void loop() {
 }
 
 void receiveNoteOn(byte channel, byte note, byte velocity) {
-  analogWrite(LED_1, velocity);
+  digitalWrite(LED_1, HIGH);
 }
 
 void receiveNoteOff(byte channel, byte note, byte velocity) {
   digitalWrite(LED_1, LOW);
-}
-
-void receiveControlChange(byte channel, byte number, byte value) {
-  analogWrite(LED_2, value);
 }
