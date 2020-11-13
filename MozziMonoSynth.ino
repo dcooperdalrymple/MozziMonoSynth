@@ -13,39 +13,9 @@
 
 #define STATUS_LED 13
 
-#define OSC_OCTAVE_DEC_BUTTON 2
-#define OSC_OCTAVE_INC_BUTTON 4
-#define OSC_OCTAVE_LED 3
-
-#define OSC_WAVEFORM_POT A0
-#define OSC_VIBRATO_POT A1
-#define LPF_FREQUENCY_POT A2
-#define LPF_RESONANCE_POT A3
-#define ENV_ATTACK_POT A4
-#define ENV_RELEASE_POT A5
-
 /// Mozzi
 
 #define CONTROL_RATE 128 // Defaults to 64
-#define TABLE_NUM_CELLS SIN1024X16_NUM_CELLS
-
-/// Oscillator
-
-#define OSC_WAVEFORM_NUM 4
-#define OSC_VIBRATO_FREQUENCY 15
-#define OSC_VIBRATO_MIN 0
-#define OSC_VIBRATO_MAX 255
-
-/// Envelope
-
-#define ENV_ATTACK_LEVEL 255
-#define ENV_DECAY_LEVEL 255
-#define ENV_DECAY_TIME 50
-#define ENV_SUSTAIN_TIME 60000
-#define ENV_ATTACK_MIN 50
-#define ENV_ATTACK_MAX 10000
-#define ENV_RELEASE_MIN 50
-#define ENV_RELEASE_MAX 20000
 
 // Libraries
 
@@ -55,122 +25,118 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include <MozziGuts.h>
 #include <mozzi_fixmath.h>
 #include <mozzi_midi.h>
-#include <mozzi_analog.h>
-
-#include "Oscil16.h"
-#include <LowPassFilter.h>
 #include <Line.h>
-#include "ADSR16.h"
 
-#include "tables/sin1024_int16.h"
-#include "tables/tri1024_int16.h"
-#include "tables/saw1024_int16.h"
-#include "tables/sqr1024_int16.h"
+// Object Classes
 
-#include "Voice.h"
+#include "Voice.h" // Declared early for definitions
+#include "control/NoteBank.h"
+#include "control/Controls.h"
+#include "Program.h"
 
-// Local Interfaces
+// Objects
 
-// Synthesis Objects
-
-Oscil16 <TABLE_NUM_CELLS, AUDIO_RATE> oscillator;
-Oscil16 <TABLE_NUM_CELLS, CONTROL_RATE> lfo(SIN1024X16_NUM_CELLS); // Vibrato LFO
-LowPassFilter lpf;
-ADSR16 <CONTROL_RATE, CONTROL_RATE> envelope;
-int16_t envelope_gain;
-
-// Settings Objects
-
+NoteBank note_bank;
+Controls controls;
 Voice voice;
+Program program;
 
 void setup() {
-  MIDI.setHandleNoteOn(receiveNoteOn);
-  MIDI.setHandleNoteOff(receiveNoteOff);
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+    MIDI.setHandleNoteOn(receiveNoteOn);
+    MIDI.setHandleNoteOff(receiveNoteOff);
+    MIDI.begin(MIDI_CHANNEL_OMNI);
 
-  pinMode(STATUS_LED, OUTPUT);
+    pinMode(STATUS_LED, OUTPUT);
 
-  setWave(0);
-  lfo.setFreq(OSC_VIBRATO_FREQUENCY);
+    //controls = Controls();
+    //voice = Voice();
 
-  envelope.setADLevels(ENV_ATTACK_LEVEL, ENV_DECAY_LEVEL);
-  envelope.setTimes(ENV_ATTACK_MIN, ENV_DECAY_TIME, ENV_SUSTAIN_TIME, ENV_RELEASE_MIN);
-  envelope_gain = 0;
-
-  lpf.setCutoffFreq(255);
-  lpf.setResonance(0);
-
-  startMozzi(CONTROL_RATE);
+    startMozzi(CONTROL_RATE);
 }
 
 void loop() {
-  audioHook();
+    audioHook();
 }
 
-void setWave(uint8_t table) {
-  switch (table) {
-    case 0:
-      oscillator.setTable(SIN1024X16_DATA);
-      break;
-    case 1:
-      oscillator.setTable(TRI1024X16_DATA);
-      break;
-    case 2:
-      oscillator.setTable(SAW1024X16_DATA);
-      break;
-    case 3:
-      oscillator.setTable(SQR1024X16_DATA);
-      break;
-  }
-}
-
-bool updated;
 void updateControl() {
-  MIDI.read();
 
-  // Update Oscillator
-  if (voice.setOscWaveform(mozziAnalogRead(OSC_WAVEFORM_POT))) setWave(voice.getOscWaveform());
+    // Flush Midi buffer
+    while (MIDI.read()) { };
 
-  // Update Oscillator Pitch LFO (Vibrator)
-  voice.setOscVibrato(mozziAnalogRead(OSC_VIBRATO_POT));
+    // Transfer control updates to voice
+    if (controls.update()) updateVoiceControls();
 
-  // Update Low Pass Filter
-  updated = voice.setLpfFrequency(mozziAnalogRead(LPF_FREQUENCY_POT));
-  updated = voice.setLpfResonance(mozziAnalogRead(LPF_RESONANCE_POT)) || updated;
-  if (updated) {
-    lpf.setCutoffFreq(voice.getLpfFrequency());
-    lpf.setResonance(voice.getLpfResonance());
-  }
+    // Update control rate parameters of voice
+    voice.update();
 
-  // Update Envelope
-  updated = voice.setEnvAttack(mozziAnalogRead(ENV_ATTACK_POT));
-  updated = voice.setEnvRelease(mozziAnalogRead(ENV_RELEASE_POT)) || updated;
-  if (updated) envelope.setTimes(voice.getEnvAttack(), ENV_DECAY_TIME, ENV_SUSTAIN_TIME, voice.getEnvRelease());
+    // Fade LED with LFO and Envelope
+    analogWrite(OSC_OCTAVE_LED_1, voice.getCurrentLFO());
+    analogWrite(OSC_OCTAVE_LED_2, voice.getCurrentGain());
 
-  envelope.update();
-  envelope_gain = envelope.next();
 }
 
 int16_t updateAudio() {
-  if (voice.getOscVibrato() != 0) {
-    Q15n16 vibrato = (Q15n16)voice.getOscVibrato() * lfo.next();
-    return (int16_t)(((int32_t)envelope_gain * lpf.next(oscillator.phMod(vibrato))) >> 18);
-  } else {
-    return (int16_t)(((int32_t)envelope_gain * lpf.next(oscillator.next())) >> 18);
-  }
+    return voice.next();
 }
 
-uint8_t currentNote = 255;
+// Midi Callbacks
+
 void receiveNoteOn(byte channel, byte note, byte velocity) {
-  currentNote = note;
-  digitalWrite(STATUS_LED, HIGH);
+    digitalWrite(STATUS_LED, HIGH);
 
-  oscillator.setFreq(mtof(float(note)));
-  envelope.noteOn();
+    note_bank.removeNote(note); // Prevent duplicates
+    note_bank.addNote(note);
+
+    voice.noteOn(note_bank.getNote());
 }
-void receiveNoteOff(byte channel, byte note, byte velocity) {
-  if (currentNote != note) return;
-  digitalWrite(STATUS_LED, LOW);
 
-  envelope.noteOff();
+void receiveNoteOff(byte channel, byte note, byte velocity) {
+    if (note_bank.removeNote(note) == false) return;
+    if (note_bank.hasNote()) {
+        voice.noteOn(note_bank.getNote());
+    } else {
+        digitalWrite(STATUS_LED, LOW);
+        voice.noteOff();
+    }
+}
+
+// Controls transfer to voice
+
+void updateVoiceControls() {
+    for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
+        if (controls.updated[i] >= CONTROLS_NUM_POTS) break;
+        switch (controls.updated[i]) {
+
+            case OSC_WAVEFORM_KEY:
+                voice.setWaveform((uint8_t)controls.get(OSC_WAVEFORM_KEY));
+                break;
+            case OSC_VIBRATO_KEY:
+                voice.setVibratoIntensity((uint8_t)controls.get(OSC_VIBRATO_KEY));
+                break;
+
+            case LPF_FREQUENCY_KEY:
+                if (controls.isUpdated(LPF_RESONANCE_KEY)) break;
+            case LPF_RESONANCE_KEY:
+                voice.setFilterFrequencyResonance((uint8_t)controls.get(LPF_FREQUENCY_KEY), (uint8_t)controls.get(LPF_RESONANCE_KEY));
+                break;
+
+            case ENV_ATTACK_KEY:
+                if (controls.isUpdated(ENV_RELEASE_KEY)) break;
+            case ENV_RELEASE_KEY:
+                voice.setEnvelopeAttackRelease(controls.get(ENV_ATTACK_KEY), controls.get(ENV_RELEASE_KEY));
+                break;
+
+        }
+    }
+}
+
+// Program transfer to controls and voice
+
+void loadProgramVoice(uint8_t index = 0) {
+    program.read(index);
+    for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
+        controls.set(i, program.get(i));
+    }
+    controls.checkUpdated();
+    updateVoiceControls();
 }

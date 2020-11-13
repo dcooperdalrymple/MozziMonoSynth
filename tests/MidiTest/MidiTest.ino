@@ -25,9 +25,9 @@ void loop() {
 }
 
 void receiveNoteOn(byte channel, byte note, byte velocity) {
-  digitalWrite(LED_1, HIGH);
+  analogWrite(LED_1, velocity);
 }
 
 void receiveNoteOff(byte channel, byte note, byte velocity) {
-  digitalWrite(LED_1, LOW);
+  analogWrite(LED_1, 0);
 }
