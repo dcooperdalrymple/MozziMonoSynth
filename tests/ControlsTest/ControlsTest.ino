@@ -21,60 +21,60 @@
 #define KNOB_6 A3
 
 void setup() {
-  Serial.begin(9600);
-  
-  pinMode(LED_1, OUTPUT);
-  pinMode(LED_2, OUTPUT);
+    Serial.begin(9600);
 
-  pinMode(BUTTON_1, INPUT_PULLUP);
-  pinMode(BUTTON_2, INPUT_PULLUP);
+    pinMode(LED_1, OUTPUT);
+    pinMode(LED_2, OUTPUT);
 
-  pinMode(KNOB_1, INPUT);
-  pinMode(KNOB_2, INPUT);
-  pinMode(KNOB_3, INPUT);
-  pinMode(KNOB_4, INPUT);
-  pinMode(KNOB_5, INPUT);
-  pinMode(KNOB_6, INPUT);
+    pinMode(BUTTON_1, INPUT_PULLUP);
+    pinMode(BUTTON_2, INPUT_PULLUP);
+
+    pinMode(KNOB_1, INPUT);
+    pinMode(KNOB_2, INPUT);
+    pinMode(KNOB_3, INPUT);
+    pinMode(KNOB_4, INPUT);
+    pinMode(KNOB_5, INPUT);
+    pinMode(KNOB_6, INPUT);
 }
 
-byte ledState = true;
+byte ledState = false;
 byte i = 0;
 void loop() {
-  for (i = 0; i < 256; i++) {
-    if (!!ledState) {
-      analogWrite(LED_1, i);
-      analogWrite(LED_2, 255 - i);
-    } else {
-      analogWrite(LED_1, 255 - i);
-      analogWrite(LED_2, i);
+    for (i = 0; i < 256; i++) {
+        if (!!ledState) {
+            analogWrite(LED_1, i);
+            analogWrite(LED_2, 255 - i);
+        } else {
+            analogWrite(LED_1, 255 - i);
+            analogWrite(LED_2, i);
+        }
+        delay(4);
     }
-    delay(4);
-  }
-  ledState = !ledState;
-  
-  Serial.print("Button 1: ");
-  if (!!digitalRead(BUTTON_1)) {
-    Serial.println("Off");
-  } else {
-    Serial.println("On");
-  }
-  Serial.print("Button 2: ");
-  if (!!digitalRead(BUTTON_2)) {
-    Serial.println("Off");
-  } else {
-    Serial.println("On");
-  }
+    ledState = !ledState;
 
-  Serial.print("Knob 1: ");
-  Serial.println(analogRead(KNOB_1));
-  Serial.print("Knob 2: ");
-  Serial.println(analogRead(KNOB_2));
-  Serial.print("Knob 3: ");
-  Serial.println(analogRead(KNOB_3));
-  Serial.print("Knob 4: ");
-  Serial.println(analogRead(KNOB_4));
-  Serial.print("Knob 5: ");
-  Serial.println(analogRead(KNOB_5));
-  Serial.print("Knob 6: ");
-  Serial.println(analogRead(KNOB_6));
+    Serial.print("Button 1: ");
+    if (!!digitalRead(BUTTON_1)) {
+        Serial.println("Off");
+    } else {
+        Serial.println("On");
+    }
+    Serial.print("Button 2: ");
+    if (!!digitalRead(BUTTON_2)) {
+        Serial.println("Off");
+    } else {
+        Serial.println("On");
+    }
+
+    Serial.print("Knob 1: ");
+    Serial.println(analogRead(KNOB_1));
+    Serial.print("Knob 2: ");
+    Serial.println(analogRead(KNOB_2));
+    Serial.print("Knob 3: ");
+    Serial.println(analogRead(KNOB_3));
+    Serial.print("Knob 4: ");
+    Serial.println(analogRead(KNOB_4));
+    Serial.print("Knob 5: ");
+    Serial.println(analogRead(KNOB_5));
+    Serial.print("Knob 6: ");
+    Serial.println(analogRead(KNOB_6));
 }

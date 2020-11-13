@@ -6,10 +6,12 @@
 #define POT_H_
 
 #include <mozzi_analog.h>
-#include <RollingAverage.h>
+//#include <RollingAverage.h>
+#include <Smooth.h>
 
 #define POT_LOCK_RADIUS 1
 #define POT_AVERAGE_WINDOW 32
+const float potSmoothness = 0.96f;
 #define POT_MIN 0
 #define POT_MAX 1023
 
@@ -21,6 +23,7 @@ public:
     Pot(uint8_t pin) {
         _pin = pin;
         pinMode(pin, INPUT);
+        smooth.setSmoothness(potSmoothness);
     }
     virtual ~Pot() {}
 
@@ -32,11 +35,16 @@ public:
         updated = false;
 
         raw = mozziAnalogRead(_pin);
-        raw = average.next(raw);
+        //raw = average.next(raw);
+        raw = smooth.next(raw);
+
+        // TODO: Locking pot value logic
+        /*
         if (!locked && raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS) {
             locked = true;
         }
         if (!locked) return false;
+        */
 
         if (_value == raw) {
             return false;
@@ -87,7 +95,8 @@ private:
 
     uint8_t _pin;
     uint16_t raw = 0;
-    RollingAverage <uint16_t, POT_AVERAGE_WINDOW> average;
+    //RollingAverage <uint16_t, POT_AVERAGE_WINDOW> average;
+    Smooth <uint16_t> smooth;
     uint16_t _value = 0;
     bool locked = false;
     bool updated = false;
