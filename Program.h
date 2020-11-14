@@ -7,7 +7,7 @@
 
 #include <EEPROM.h>
 
-#define PROGRAM_COUNT 8
+#define PROGRAM_COUNT 4
 #define PROGRAM_DATA_SIZE (CONTROLS_NUM_POTS*2)
 
 class Program {

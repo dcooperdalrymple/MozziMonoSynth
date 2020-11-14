@@ -134,7 +134,7 @@ public:
 
     int16_t next() {
         // bit shift in and out to help keep filter happy
-        return (int16_t)(envelope_gain * filter.next(oscillator.phMod((Q15n16)lfo_current) >> 1) << 1) >> 2;
+        return (int16_t)((int32_t)(envelope_gain * filter.next(oscillator.phMod((Q15n16)lfo_current))) >> 4); // 16-bit -> 14-bit & extra two bits to prevent distortion from filter
     }
 
 private:

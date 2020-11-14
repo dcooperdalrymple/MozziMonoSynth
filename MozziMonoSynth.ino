@@ -52,6 +52,9 @@ void setup() {
     digitalWrite(STATUS_LED, LOW);
 
     controls.setup();
+    controls.setWriteProgramPointer(writeProgramVoice);
+    controls.setReadProgramPointer(loadProgramVoice);
+
     voice.init();
 
     //loadProgramVoice(0);
@@ -83,17 +86,40 @@ void updateControl() {
     if (controls.update()) updateVoiceControls();
 
     // Update control rate parameters of voice
-    voice.update();
+    if (controls.getState() != STATE_PROGRAM) voice.update();
 
-    // Fade LED with LFO and Envelope
-    controls.setLed(LED_1_KEY, voice.getCurrentLFO());
-    controls.setLed(LED_2_KEY, voice.getCurrentGain());
+    // LED display
+    switch (controls.getState()) {
+        case STATE_PRIMARY:
+            // Fade LED with LFO and Envelope
+            controls.setLed(LED_1_KEY, voice.getCurrentLFO());
+            controls.setLed(LED_2_KEY, voice.getCurrentGain());
+        case STATE_SECONDARY:
+            controls.setLed(LED_1_KEY, LED_ON);
+            controls.setLed(LED_2_KEY, LED_OFF);
+            break;
+        case STATE_TERTIARY:
+            controls.setLed(LED_1_KEY, LED_OFF);
+            controls.setLed(LED_2_KEY, LED_ON);
+            break;
+        case STATE_PROGRAM:
+            // Indicate the selected program
+            uint8_t p = controls.getCurrentProgram();
+            controls.setLed(LED_1_KEY, p & B10 ? LED_ON : LED_QUARTER);
+            controls.setLed(LED_2_KEY, p & B01 ? LED_ON : LED_QUARTER);
+            break;
+    }
 
 }
 
 int16_t updateAudio() {
     controls.updateLeds();
-    return voice.next();
+
+    if (controls.getState() == STATE_PROGRAM) {
+        return 0; // Mute when reading/writing program
+    } else {
+        return voice.next();
+    }
 }
 
 // Midi Callbacks
@@ -149,10 +175,16 @@ void updateVoiceControls() {
 
 // Program transfer to controls and voice
 
-void loadProgramVoice(uint8_t index = 0) {
+void writeProgramVoice(uint8_t index) {
+    for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
+        program.set(i, controls.getPot(i, false));
+    }
+    program.write(index);
+}
+void loadProgramVoice(uint8_t index) {
     program.read(index);
     for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
-        controls.set(i, program.get(i));
+        controls.setPot(i, program.get(i), true);
     }
     controls.checkUpdated();
     updateVoiceControls();
