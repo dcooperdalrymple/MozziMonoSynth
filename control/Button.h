@@ -1,6 +1,8 @@
 /*
  * Button.h
  * Description: Debounce button input and handle press types.
+ * Version: 0.1.0
+ * Since: 0.1.0
  */
 
 #ifndef BUTTON_H_

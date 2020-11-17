@@ -1,6 +1,8 @@
 /*
  * Led.h
  * Description: Manually control LED PWM. Based on /examples/11.Communication/Sinewave_PWM_leds_HIFI/Sinewave_PWM_leds_HIFI.ino
+ * Version: 0.1.0
+ * Since: 0.1.0
  */
 
 #ifndef LED_H_

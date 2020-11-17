@@ -3,7 +3,7 @@
  * Version: 0.1.0
  * Author: D Cooper Dalrymple
  * Created: 11/04/2020
- * Updated: 11/13/2020
+ * Updated: 11/17/2020
  * Description: 14-bit monophonic synthesizer using the Mozzi audio synthesis library. Best used for bass voices. Uses HiFi mode on Arduino Uno with hex inverter buffer and hardware low pass filter.
  * https://dcooperdalrymple.com/
  */
@@ -32,8 +32,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include "Constants.h"
 
 // Local Classes
-#include "control/NoteBank.h"
-#include "control/Controls.h"
+#include "NoteBank.h"
+#include "Controls.h"
 #include "Voice.h"
 #include "Program.h"
 

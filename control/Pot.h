@@ -1,5 +1,7 @@
 /*
  * Pot.h
+ * Version: 0.1.0
+ * Since: 0.1.0
  */
 
 #ifndef POT_H_
