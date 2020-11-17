@@ -6,8 +6,6 @@
 #ifndef NOTE_BANK_H_
 #define NOTE_BANK_H_
 
-#define NOTE_BANK_SIZE 32
-
 class NoteBank {
 public:
 

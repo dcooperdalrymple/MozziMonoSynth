@@ -17,33 +17,6 @@
 #include <tables/saw1024_int8.h>
 #include "tables/square1024_int8.h"
 
-/// Oscillator
-#define OSC_NUM_CELLS SIN1024_NUM_CELLS
-#define OSC_WAVEFORM_NUM 4
-
-// Vibrato LFO
-#define LFO_GAIN_GAP 20
-#define LFO_GAIN_MIN 0
-#define LFO_GAIN_MAX 255
-#define LFO_NUM_CELLS SIN1024_NUM_CELLS
-const float lfoFrequency = 6.f;
-
-/// Low Pass Filter
-#define LPF_FREQUENCY_MIN 20
-#define LPF_FREQUENCY_MAX 255
-#define LPF_RESONANCE_MIN 0
-#define LPF_RESONANCE_MAX 170
-
-/// Envelope
-#define ENV_ATTACK_LEVEL 255
-#define ENV_DECAY_LEVEL 255
-#define ENV_DECAY_TIME 50
-#define ENV_SUSTAIN_TIME 60000
-#define ENV_ATTACK_MIN 20
-#define ENV_ATTACK_MAX 2000
-#define ENV_RELEASE_MIN 20
-#define ENV_RELEASE_MAX 4000
-
 class Voice {
 public:
 
@@ -60,8 +33,8 @@ public:
         lfo.setFreq(lfoFrequency);
         lfo_amount = 0;
 
-        envelope.setADLevels(ENV_ATTACK_LEVEL, ENV_DECAY_LEVEL);
-        envelope.setTimes(ENV_ATTACK_MIN, ENV_DECAY_TIME, ENV_SUSTAIN_TIME, ENV_RELEASE_MIN);
+        envelope.setADLevels(ENV_1_ATTACK_LEVEL, ENV_DECAY_LEVEL);
+        envelope.setTimes(ENV_1_ATTACK_MIN, ENV_DECAY_TIME, ENV_SUSTAIN_TIME, ENV_1_RELEASE_MIN);
         envelope_gain = 0;
 
         filter.setCutoffFreqAndResonance(255, 0);

@@ -28,15 +28,17 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include <mozzi_midi.h>
 #include <Line.h>
 
-// Object Classes
-#include "Voice.h" // Declared early for definitions
+// Global Constants
+#include "Constants.h"
+
+// Local Classes
 #include "control/NoteBank.h"
 #include "control/Controls.h"
+#include "Voice.h"
 #include "Program.h"
 
 // Objects
 NoteBank note_bank;
-Controls controls;
 Voice voice;
 Program program;
 
@@ -51,9 +53,10 @@ void setup() {
     pinMode(STATUS_LED, OUTPUT);
     digitalWrite(STATUS_LED, LOW);
 
-    controls.setup();
-    controls.setWriteProgramPointer(writeProgramVoice);
-    controls.setReadProgramPointer(loadProgramVoice);
+    Controls::setup();
+    Controls::setUpdateHandler(updateVoiceControl);
+    Controls::setWriteProgramCallback(writeProgramVoice);
+    Controls::setReadProgramCallback(loadProgramVoice);
 
     voice.init();
 
@@ -82,40 +85,40 @@ void updateControl() {
     while (MIDI.read()) { };
     #endif
 
-    // Transfer control updates to voice
-    if (controls.update()) updateVoiceControls();
+    // Check for control updates and update voice with handler
+    Controls::update();
 
     // Update control rate parameters of voice
-    if (controls.getState() != STATE_PROGRAM) voice.update();
+    if (Controls::getState() != STATE_PROGRAM) voice.update();
 
     // LED display
-    switch (controls.getState()) {
+    switch (Controls::getState()) {
         case STATE_PRIMARY:
             // Fade LED with LFO and Envelope
-            controls.setLed(LED_1_KEY, voice.getCurrentLFO());
-            controls.setLed(LED_2_KEY, voice.getCurrentGain());
+            Controls::setLed(LED_1_KEY, voice.getCurrentLFO());
+            Controls::setLed(LED_2_KEY, voice.getCurrentGain());
         case STATE_SECONDARY:
-            controls.setLed(LED_1_KEY, LED_ON);
-            controls.setLed(LED_2_KEY, LED_OFF);
+            Controls::setLed(LED_1_KEY, LED_ON);
+            Controls::setLed(LED_2_KEY, LED_OFF);
             break;
         case STATE_TERTIARY:
-            controls.setLed(LED_1_KEY, LED_OFF);
-            controls.setLed(LED_2_KEY, LED_ON);
+            Controls::setLed(LED_1_KEY, LED_OFF);
+            Controls::setLed(LED_2_KEY, LED_ON);
             break;
         case STATE_PROGRAM:
             // Indicate the selected program
-            uint8_t p = controls.getCurrentProgram();
-            controls.setLed(LED_1_KEY, p & B10 ? LED_ON : LED_QUARTER);
-            controls.setLed(LED_2_KEY, p & B01 ? LED_ON : LED_QUARTER);
+            uint8_t p = Controls::getSelectedProgram();
+            Controls::setLed(LED_1_KEY, p & B10 ? LED_ON : LED_QUARTER);
+            Controls::setLed(LED_2_KEY, p & B01 ? LED_ON : LED_QUARTER);
             break;
     }
 
 }
 
 int16_t updateAudio() {
-    controls.updateLeds();
+    Controls::updateLeds();
 
-    if (controls.getState() == STATE_PROGRAM) {
+    if (Controls::getState() == STATE_PROGRAM) {
         return 0; // Mute when reading/writing program
     } else {
         return voice.next();
@@ -145,31 +148,28 @@ void receiveNoteOff(byte channel, byte note, byte velocity) {
 
 // Controls transfer to voice
 
-void updateVoiceControls() {
-    for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
-        if (controls.updated[i] == 255) break;
-        switch (controls.updated[i]) {
+void updateVoiceControl(uint8_t key, uint16_t value) {
+    switch (key) {
 
-            case OSC_WAVEFORM_KEY:
-                voice.setWaveform((uint8_t)controls.get(OSC_WAVEFORM_KEY));
-                break;
-            case LFO_GAIN_KEY:
-                voice.setVibratoIntensity((uint8_t)controls.get(LFO_GAIN_KEY));
-                break;
+        case OSC_1_WAVEFORM_KEY:
+            voice.setWaveform((uint8_t)value);
+            break;
+        case LFO_AMOUNT_KEY:
+            voice.setVibratoIntensity((uint8_t)value);
+            break;
 
-            case LPF_FREQUENCY_KEY:
-                if (controls.isUpdated(LPF_RESONANCE_KEY)) break;
-            case LPF_RESONANCE_KEY:
-                voice.setFilterFrequencyResonance((uint8_t)controls.get(LPF_FREQUENCY_KEY), (uint8_t)controls.get(LPF_RESONANCE_KEY));
-                break;
+        case LPF_FREQUENCY_KEY:
+            if (Controls::isUpdated(LPF_RESONANCE_KEY)) break;
+        case LPF_RESONANCE_KEY:
+            voice.setFilterFrequencyResonance((uint8_t)Controls::getPot(LPF_FREQUENCY_KEY), (uint8_t)Controls::getPot(LPF_RESONANCE_KEY));
+            break;
 
-            case ENV_ATTACK_KEY:
-                if (controls.isUpdated(ENV_RELEASE_KEY)) break;
-            case ENV_RELEASE_KEY:
-                voice.setEnvelopeAttackRelease(controls.get(ENV_ATTACK_KEY), controls.get(ENV_RELEASE_KEY));
-                break;
+        case ENV_1_ATTACK_KEY:
+            if (Controls::isUpdated(ENV_1_RELEASE_KEY)) break;
+        case ENV_1_RELEASE_KEY:
+            voice.setEnvelopeAttackRelease(Controls::getPot(ENV_1_ATTACK_KEY), Controls::getPot(ENV_1_RELEASE_KEY));
+            break;
 
-        }
     }
 }
 
@@ -177,15 +177,14 @@ void updateVoiceControls() {
 
 void writeProgramVoice(uint8_t index) {
     for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
-        program.set(i, controls.getPot(i, false));
+        program.set(i, Controls::getPot(i, false));
     }
     program.write(index);
 }
 void loadProgramVoice(uint8_t index) {
     program.read(index);
     for (uint8_t i = 0; i < CONTROLS_NUM_POTS; i++) {
-        controls.setPot(i, program.get(i), true);
+        Controls::setPot(i, program.get(i), true);
+        updateVoiceControl(i, program.get(i));
     }
-    controls.checkUpdated();
-    updateVoiceControls();
 }
