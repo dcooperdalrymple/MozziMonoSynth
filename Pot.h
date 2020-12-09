@@ -37,13 +37,15 @@ public:
         uint16_t raw = mozziAnalogRead(_pin);
         raw = Pot::nextSmooth(_pin, raw);
 
-        // TODO: Locking pot value logic
-        /*
-        if (!locked && raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS) {
-            locked = true;
+        if (locked && (
+            (_value <= POT_MIN + POT_LOCK_RADIUS && raw < POT_MIN + POT_LOCK_RADIUS) ||
+            (_value >= POT_MAX - POT_LOCK_RADIUS && raw > POT_MAX - POT_LOCK_RADIUS) ||
+            (raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS))) {
+            locked = false;
         }
-        if (!locked) return false;
-        */
+
+        if (locked && raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS) locked = false;
+        if (locked) return false;
 
         if (_value == raw) {
             return false;
