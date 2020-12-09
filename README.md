@@ -14,3 +14,14 @@
 </p>
 
 > Still in early development, but more details and schematics to come soon.
+
+#### Control Mapping
+
+| Knob | Mode 1                | Mode 2 (left)         | Mode 3 (right)    |
+| :--: | --------------------- | --------------------- | ----------------- |
+| 1    | Oscillator 1 Waveform | Oscillator 2 Waveform | Oscillator Detune |
+| 2    | LFO Amount            | LFO Frequency         | LFO Destination   |
+| 3    | Filter Frequency      | Envelope Amount       | Oscillator Mix    |
+| 4    | Filter Resonance      | Envelope Level        | Oscillator Tune   |
+| 5    | Amp Attack            | Envelope Attack       | Amp Decay         |
+| 6    | Amp Release           | Envelope Release      | Envelope Decay    |

@@ -15,14 +15,22 @@
 
 // Oscillator
 #define OSC_NUM_CELLS SIN1024_NUM_CELLS
-#define OSC_1_WAVEFORM_NUM 4
+#define OSC_WAVEFORM_NUM 4
+#define OSC_MIX_MIN 0
+#define OSC_MIX_MAX 255
+#define OSC_MIX_MID (OSC_MIX_MAX + OSC_MIX_MIN) / 2
+const float oscTuneMin = 0.5f;
+const float oscTuneMax = 2.f;
+const float oscDetuneMin = 0.0f;
+const float oscDetuneMax = 0.1f;
 
 // LFO
 #define LFO_AMOUNT_GAP 20
 #define LFO_AMOUNT_MIN 0
 #define LFO_AMOUNT_MAX 255
+const float lfoFrequencyMin = 0.5f;
+const float lfoFrequencyMax = 20.f;
 #define LFO_NUM_CELLS SIN1024_NUM_CELLS
-const float lfoFrequency = 6.f;
 
 // Low Pass Filter
 #define LPF_FREQUENCY_MIN 20
@@ -31,14 +39,20 @@ const float lfoFrequency = 6.f;
 #define LPF_RESONANCE_MAX 170
 
 // Envelope
-#define ENV_1_ATTACK_LEVEL 255
+#define ENV_AMOUNT_MIN 0
+#define ENV_AMOUNT_MAX 255
+#define ENV_ATTACK_LEVEL 255
+#define ENV_DECAY_LEVEL_MIN 0
+#define ENV_DECAY_LEVEL_MAX 255
 #define ENV_DECAY_LEVEL 255
 #define ENV_DECAY_TIME 50
+#define ENV_DECAY_MIN 20
+#define ENV_DECAY_MAX 1000
 #define ENV_SUSTAIN_TIME 60000
-#define ENV_1_ATTACK_MIN 20
-#define ENV_1_ATTACK_MAX 2000
-#define ENV_1_RELEASE_MIN 20
-#define ENV_1_RELEASE_MAX 4000
+#define ENV_ATTACK_MIN 20
+#define ENV_ATTACK_MAX 2000
+#define ENV_RELEASE_MIN 20
+#define ENV_RELEASE_MAX 4000
 
 /*************
  * Note Bank *

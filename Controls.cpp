@@ -55,14 +55,24 @@ void Controls::setup() {
     Pot::prepare();
 
     Controls::pots[OSC_1_WAVEFORM_KEY].setMapPointer(Controls::mapOscWaveform);
+    Controls::pots[OSC_2_WAVEFORM_KEY].setMapPointer(Controls::mapOscWaveform);
+    Controls::pots[OSC_MIX_KEY].setMinMax(OSC_MIX_MIN, OSC_MIX_MAX);
+
     //Controls::pots[LFO_AMOUNT_KEY].setMapPointer(Controls::mapLfoGain);
     Controls::pots[LFO_AMOUNT_KEY].setMinMax(LFO_AMOUNT_MIN, LFO_AMOUNT_MAX);
 
     Controls::pots[LPF_FREQUENCY_KEY].setMinMax(LPF_FREQUENCY_MIN, LPF_FREQUENCY_MAX);
     Controls::pots[LPF_RESONANCE_KEY].setMinMax(LPF_RESONANCE_MIN, LPF_RESONANCE_MAX);
 
-    Controls::pots[ENV_1_ATTACK_KEY].setMinMax(ENV_1_ATTACK_MIN, ENV_1_ATTACK_MAX);
-    Controls::pots[ENV_1_RELEASE_KEY].setMinMax(ENV_1_RELEASE_MIN, ENV_1_RELEASE_MAX);
+    Controls::pots[ENV_1_ATTACK_KEY].setMinMax(ENV_ATTACK_MIN, ENV_ATTACK_MAX);
+    Controls::pots[ENV_1_RELEASE_KEY].setMinMax(ENV_RELEASE_MIN, ENV_RELEASE_MAX);
+    Controls::pots[ENV_1_DECAY_KEY].setMinMax(ENV_DECAY_MIN, ENV_DECAY_MAX);
+
+    Controls::pots[ENV_2_AMOUNT_KEY].setMinMax(ENV_AMOUNT_MIN, ENV_AMOUNT_MAX);
+    Controls::pots[ENV_2_LEVEL_KEY].setMinMax(ENV_DECAY_LEVEL_MIN, ENV_DECAY_LEVEL_MAX);
+    Controls::pots[ENV_2_ATTACK_KEY].setMinMax(ENV_ATTACK_MIN, ENV_ATTACK_MAX);
+    Controls::pots[ENV_2_RELEASE_KEY].setMinMax(ENV_RELEASE_MIN, ENV_RELEASE_MAX);
+    Controls::pots[ENV_2_DECAY_KEY].setMinMax(ENV_DECAY_MIN, ENV_DECAY_MAX);
 
     Controls::leds[LED_1_KEY]->setPin(LED_1_PIN);
     Controls::leds[LED_2_KEY]->setPin(LED_2_PIN);

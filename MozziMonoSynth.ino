@@ -154,21 +154,26 @@ void updateVoiceControl(uint8_t key, uint16_t value) {
     switch (key) {
 
         case OSC_1_WAVEFORM_KEY:
-            voice.setWaveform((uint8_t)value);
+            voice.setOscillatorWaveform(0, (uint8_t)value);
             break;
         case OSC_2_WAVEFORM_KEY:
+            voice.setOscillatorWaveform(1, (uint8_t)value);
             break;
         case OSC_DETUNE_KEY:
+            voice.setOscillatorDetune(value);
             break;
         case OSC_MIX_KEY:
+            voice.setOscillatorMix((uint8_t)value);
             break;
         case OSC_TUNE_KEY:
+            voice.setOscillatorTune(value);
             break;
 
         case LFO_AMOUNT_KEY:
             voice.setLfoAmount((uint8_t)value);
             break;
         case LFO_FREQUENCY_KEY:
+            voice.setLfoFrequency(value);
             break;
         case LFO_DESTINATION_KEY:
             break;
@@ -180,21 +185,25 @@ void updateVoiceControl(uint8_t key, uint16_t value) {
             break;
 
         case ENV_1_ATTACK_KEY:
+            if (Controls::isUpdated(ENV_1_DECAY_KEY)) break;
+        case ENV_1_DECAY_KEY:
             if (Controls::isUpdated(ENV_1_RELEASE_KEY)) break;
         case ENV_1_RELEASE_KEY:
-            voice.setEnvelopeAttackRelease(Controls::getPot(ENV_1_ATTACK_KEY), Controls::getPot(ENV_1_RELEASE_KEY));
-            break;
-        case ENV_1_DECAY_KEY:
+            voice.setEnvelopeTimes(0, Controls::getPot(ENV_1_ATTACK_KEY), Controls::getPot(ENV_1_RELEASE_KEY), Controls::getPot(ENV_1_DECAY_KEY));
             break;
 
         case ENV_2_AMOUNT_KEY:
+            voice.setEnvelopeAmount(1, (uint8_t)value);
             break;
         case ENV_2_LEVEL_KEY:
+            voice.setEnvelopeLevel(1, (uint8_t)value);
             break;
         case ENV_2_ATTACK_KEY:
+            if (Controls::isUpdated(ENV_2_DECAY_KEY)) break;
         case ENV_2_RELEASE_KEY:
-            break;
+            if (Controls::isUpdated(ENV_2_RELEASE_KEY)) break;
         case ENV_2_DECAY_KEY:
+            voice.setEnvelopeTimes(1, Controls::getPot(ENV_2_ATTACK_KEY), Controls::getPot(ENV_2_RELEASE_KEY), Controls::getPot(ENV_2_DECAY_KEY));
             break;
 
     }
