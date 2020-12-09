@@ -156,11 +156,21 @@ void updateVoiceControl(uint8_t key, uint16_t value) {
         case OSC_1_WAVEFORM_KEY:
             voice.setWaveform((uint8_t)value);
             break;
+        case OSC_2_WAVEFORM_KEY:
+            break;
+        case OSC_DETUNE_KEY:
+            break;
+        case OSC_MIX_KEY:
+            break;
+        case OSC_TUNE_KEY:
+            break;
 
         case LFO_AMOUNT_KEY:
             voice.setLfoAmount((uint8_t)value);
             break;
         case LFO_FREQUENCY_KEY:
+            break;
+        case LFO_DESTINATION_KEY:
             break;
 
         case LPF_FREQUENCY_KEY:
@@ -173,6 +183,18 @@ void updateVoiceControl(uint8_t key, uint16_t value) {
             if (Controls::isUpdated(ENV_1_RELEASE_KEY)) break;
         case ENV_1_RELEASE_KEY:
             voice.setEnvelopeAttackRelease(Controls::getPot(ENV_1_ATTACK_KEY), Controls::getPot(ENV_1_RELEASE_KEY));
+            break;
+        case ENV_1_DECAY_KEY:
+            break;
+
+        case ENV_2_AMOUNT_KEY:
+            break;
+        case ENV_2_LEVEL_KEY:
+            break;
+        case ENV_2_ATTACK_KEY:
+        case ENV_2_RELEASE_KEY:
+            break;
+        case ENV_2_DECAY_KEY:
             break;
 
     }
