@@ -9,8 +9,8 @@
 #define BUTTON_H_
 
 #define DEBOUNCE_TIME 50
-#define PRESS_TIME 250
-#define LONG_PRESS_TIME 1000
+#define PRESS_TIME 100
+#define LONG_PRESS_TIME 500
 
 typedef void (*ButtonFunctionPointer)(void);
 
@@ -37,12 +37,16 @@ public:
     }
 
     void update() {
+        /*
         bool reading = false;
         if (_pin > 8) {
             reading = !(PORTB & (1 << (_pin - 8)));
         } else {
             reading = !(PORTD & (1 << _pin));
         }
+        */
+
+        bool reading = digitalRead(_pin) != HIGH;
 
         if (reading != lastState) lastDebounceTime = millis();
 
@@ -62,15 +66,24 @@ public:
         // Check Press Time
         if (!!currentState && !_isPressed && millis() - lastPressTime >= PRESS_TIME) {
             _isPressed = true;
+            #ifdef SERIAL_DEBUG
+            Serial.println("Button Short Press");
+            #endif
             if (_pressFunctionPointer) _pressFunctionPointer();
         } else if (!!currentState && !_isLongPressed && millis() - lastPressTime >= LONG_PRESS_TIME) {
             _isLongPressed = true;
+            #ifdef SERIAL_DEBUG
+            Serial.println("Button Long Press");
+            #endif
             if (_longPressFunctionPointer) _longPressFunctionPointer();
         }
 
         lastState = reading;
     }
 
+    bool isDown() {
+        return currentState;
+    }
     bool isPressed() {
         return _isPressed;
     }

@@ -46,11 +46,14 @@ UpdateFunctionPointer Controls::_updateFunctionPointer;
 bool Controls::_updated = false;
 uint8_t Controls::currentState = STATE_PRIMARY;
 
+bool Controls::selectingProgram = false;
 uint8_t Controls::selectedProgram = 0;
 ProgramFunctionPointer Controls::_writeProgramPointer;
 ProgramFunctionPointer Controls::_readProgramPointer;
 
 void Controls::setup() {
+    Pot::prepare();
+
     Controls::pots[OSC_1_WAVEFORM_KEY].setMapPointer(Controls::mapOscWaveform);
     //Controls::pots[LFO_AMOUNT_KEY].setMapPointer(Controls::mapLfoGain);
     Controls::pots[LFO_AMOUNT_KEY].setMinMax(LFO_AMOUNT_MIN, LFO_AMOUNT_MAX);
@@ -86,7 +89,7 @@ bool Controls::update() {
         Controls::buttons[i].update();
     }
 
-    if (Controls::currentState > CONTROLS_NUM_STATES) return; // Check if we're in program mode
+    if (Controls::currentState >= CONTROLS_NUM_STATES) return; // Check if we're in program mode
 
     Controls::_updated = false;
     for (i = STATE_NUM_POTS * Controls::currentState; i < STATE_NUM_POTS * (Controls::currentState + 1); i++) {
@@ -139,28 +142,37 @@ uint16_t Controls::mapLfoGain(uint16_t value) {
 
 void Controls::setPrimaryState() {
     if (Controls::currentState == STATE_PROGRAM) {
-        // Check that both buttons are pressed
-        for (uint8_t i = 0; i < CONTROLS_NUM_BUTTONS; i++) {
-            if (!Controls::buttons[i].isPressed()) return;
+        // Make sure that we didn't just get into the program state
+        if (Controls::selectingProgram == true) {
+            Controls::selectingProgram = false;
+            return;
         }
+
+        // Check that both buttons are pressed and not long pressed
+        for (uint8_t i = 0; i < CONTROLS_NUM_BUTTONS; i++) {
+            if (!Controls::buttons[i].isPressed() || Controls::buttons[i].isLongPressed()) return;
+        }
+
         if (Controls::_readProgramPointer) Controls::_readProgramPointer(selectedProgram);
     }
 
     Controls::setState(STATE_PRIMARY);
 }
 void Controls::setSecondaryState() {
+    if (Controls::currentState == STATE_PROGRAM) return;
     Controls::setState(STATE_SECONDARY);
 }
 void Controls::setTertiaryState() {
+    if (Controls::currentState == STATE_PROGRAM) return;
     Controls::setState(STATE_TERTIARY);
 }
 
 void Controls::setProgramState() {
     if (Controls::currentState == STATE_PROGRAM) {
         // Change selected program
-        if (Controls::buttons[BUTTON_1_KEY].isPressed() && !Controls::buttons[BUTTON_2_KEY].isPressed()) {
+        if (Controls::buttons[BUTTON_1_KEY].isPressed() && !Controls::buttons[BUTTON_2_KEY].isDown()) {
             if (Controls::selectedProgram > 0) Controls::selectedProgram--;
-        } else if (!Controls::buttons[BUTTON_1_KEY].isPressed() && Controls::buttons[BUTTON_2_KEY].isPressed()) {
+        } else if (!Controls::buttons[BUTTON_1_KEY].isDown() && Controls::buttons[BUTTON_2_KEY].isPressed()) {
             if (Controls::selectedProgram < PROGRAM_COUNT - 1) Controls::selectedProgram++;
         }
         return;
@@ -171,6 +183,7 @@ void Controls::setProgramState() {
         if (!Controls::buttons[i].isPressed()) return;
     }
 
+    Controls::selectingProgram = true;
     Controls::setState(STATE_PROGRAM, false);
 }
 void Controls::checkWriteProgram() {

@@ -11,6 +11,7 @@
 #define LED_ON 255
 #define LED_HALF 127
 #define LED_QUARTER 63
+#define LED_DIM 32
 #define LED_OFF 0
 
 class Led {

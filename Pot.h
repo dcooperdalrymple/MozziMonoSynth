@@ -24,8 +24,6 @@ public:
 
     Pot(uint8_t pin) {
         _pin = pin;
-        pinMode(pin, INPUT);
-        smooth.setSmoothness(potSmoothness);
     }
     virtual ~Pot() {}
 
@@ -36,9 +34,8 @@ public:
     bool read() {
         updated = false;
 
-        raw = mozziAnalogRead(_pin);
-        //raw = average.next(raw);
-        raw = smooth.next(raw);
+        uint16_t raw = mozziAnalogRead(_pin);
+        raw = Pot::nextSmooth(_pin, raw);
 
         // TODO: Locking pot value logic
         /*
@@ -93,12 +90,12 @@ public:
         return !!updated;
     }
 
+    static void prepare();
+    static uint16_t nextSmooth(uint8_t pin, uint16_t value);
+
 private:
 
     uint8_t _pin;
-    uint16_t raw = 0;
-    //RollingAverage <uint16_t, POT_AVERAGE_WINDOW> average;
-    Smooth <uint16_t> smooth;
     uint16_t _value = 0;
     bool locked = false;
     bool updated = false;
@@ -106,6 +103,8 @@ private:
     uint16_t _min = POT_MIN, _max = POT_MAX;
 
     MapFunctionPointer _mapFunctionPointer;
+
+    static Smooth <uint16_t> smooth[STATE_NUM_POTS];
 
 };
 

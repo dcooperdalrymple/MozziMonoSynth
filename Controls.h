@@ -7,7 +7,7 @@
 #ifndef CONTROLS_H_
 #define CONTROLS_H_
 
-#include "control/Pot.h"
+#include "Pot.h"
 #include "control/Button.h"
 #include "control/Led.h"
 
@@ -67,6 +67,7 @@ private:
     static uint8_t currentState;
 
     // Variables for programming
+    static bool selectingProgram;
     static uint8_t selectedProgram;
     static ProgramFunctionPointer _writeProgramPointer;
     static ProgramFunctionPointer _readProgramPointer;

@@ -8,13 +8,9 @@
  * https://dcooperdalrymple.com/
  */
 
-// Constants
-//#define SERIAL_DEBUG
-
-/// Hardware
-#define STATUS_LED 13
-
-/// Mozzi
+// Global Constants
+#include "Constants.h"
+//#define SERIAL_DEBUG // Enable Debugging
 #define CONTROL_RATE 256 // Defaults to 64
 
 // Libraries
@@ -27,9 +23,6 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include <mozzi_fixmath.h>
 #include <mozzi_midi.h>
 #include <Line.h>
-
-// Global Constants
-#include "Constants.h"
 
 // Local Classes
 #include "NoteBank.h"
@@ -71,6 +64,7 @@ void setup() {
     #else
     Serial.begin(9600);
     Serial.println("MozziMonoSynth v0.1.0 - D Cooper Dalrymple 2020");
+    receiveNoteOn(0, 49, 255); // Play note if debugging
     #endif
 }
 
@@ -97,6 +91,7 @@ void updateControl() {
             // Fade LED with LFO and Envelope
             Controls::setLed(LED_1_KEY, voice.getCurrentLFO());
             Controls::setLed(LED_2_KEY, voice.getCurrentGain());
+            break;
         case STATE_SECONDARY:
             Controls::setLed(LED_1_KEY, LED_ON);
             Controls::setLed(LED_2_KEY, LED_OFF);
@@ -108,8 +103,8 @@ void updateControl() {
         case STATE_PROGRAM:
             // Indicate the selected program
             uint8_t p = Controls::getSelectedProgram();
-            Controls::setLed(LED_1_KEY, p & B10 ? LED_ON : LED_QUARTER);
-            Controls::setLed(LED_2_KEY, p & B01 ? LED_ON : LED_QUARTER);
+            Controls::setLed(LED_1_KEY, p & B10 ? LED_ON : LED_DIM);
+            Controls::setLed(LED_2_KEY, p & B01 ? LED_ON : LED_DIM);
             break;
     }
 
@@ -149,13 +144,23 @@ void receiveNoteOff(byte channel, byte note, byte velocity) {
 // Controls transfer to voice
 
 void updateVoiceControl(uint8_t key, uint16_t value) {
+    #ifdef SERIAL_DEBUG
+    Serial.print("Control Change: ");
+    Serial.print(key);
+    Serial.print(", ");
+    Serial.println(value);
+    #endif
+
     switch (key) {
 
         case OSC_1_WAVEFORM_KEY:
             voice.setWaveform((uint8_t)value);
             break;
+
         case LFO_AMOUNT_KEY:
-            voice.setVibratoIntensity((uint8_t)value);
+            voice.setLfoAmount((uint8_t)value);
+            break;
+        case LFO_FREQUENCY_KEY:
             break;
 
         case LPF_FREQUENCY_KEY:

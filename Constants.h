@@ -7,6 +7,8 @@
 #ifndef CONSTANTS_H_
 #define CONSTANTS_H_
 
+#define STATUS_LED 13
+
 /*************
  * Voice     *
  *************/
