@@ -60,6 +60,7 @@ void Controls::setup() {
 
     //Controls::pots[LFO_AMOUNT_KEY].setMapPointer(Controls::mapLfoGain);
     Controls::pots[LFO_AMOUNT_KEY].setMinMax(LFO_AMOUNT_MIN, LFO_AMOUNT_MAX);
+    Controls::pots[LFO_DESTINATION_KEY].setMinMax(LFO_DESTINATION_MIN, LFO_DESTINATION_MAX);
 
     Controls::pots[LPF_FREQUENCY_KEY].setMinMax(LPF_FREQUENCY_MIN, LPF_FREQUENCY_MAX);
     Controls::pots[LPF_RESONANCE_KEY].setMinMax(LPF_RESONANCE_MIN, LPF_RESONANCE_MAX);

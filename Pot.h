@@ -11,9 +11,9 @@
 //#include <RollingAverage.h>
 #include <Smooth.h>
 
-#define POT_LOCK_RADIUS 1
+#define POT_LOCK_RADIUS 16
 #define POT_AVERAGE_WINDOW 32
-const float potSmoothness = 0.96f;
+const float potSmoothness = 0.5f; // 0.96f;
 #define POT_MIN 0
 #define POT_MAX 1023
 
@@ -38,13 +38,11 @@ public:
         raw = Pot::nextSmooth(_pin, raw);
 
         if (locked && (
-            (_value <= POT_MIN + POT_LOCK_RADIUS && raw < POT_MIN + POT_LOCK_RADIUS) ||
-            (_value >= POT_MAX - POT_LOCK_RADIUS && raw > POT_MAX - POT_LOCK_RADIUS) ||
+            (_value <= POT_MIN + POT_LOCK_RADIUS * 2 && raw < POT_MIN + POT_LOCK_RADIUS * 2) ||
+            (_value >= POT_MAX - POT_LOCK_RADIUS * 2 && raw > POT_MAX - POT_LOCK_RADIUS * 2) ||
             (raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS))) {
             locked = false;
         }
-
-        if (locked && raw >= _value - POT_LOCK_RADIUS && raw <= _value + POT_LOCK_RADIUS) locked = false;
         if (locked) return false;
 
         if (_value == raw) {

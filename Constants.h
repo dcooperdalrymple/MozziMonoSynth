@@ -32,11 +32,18 @@ const float lfoFrequencyMin = 0.5f;
 const float lfoFrequencyMax = 20.f;
 #define LFO_NUM_CELLS SIN1024_NUM_CELLS
 
+#define LFO_DESTINATION_MIN 0
+#define LFO_DESTINATION_MAX 4
+#define LFO_DESTINATION_OSC_TUNE 0
+#define LFO_DESTINATION_OSC_MIX 1
+#define LFO_DESTINATION_LPF_FREQ 2
+#define LFO_DESTINATION_LPF_RESO 3
+
 // Low Pass Filter
 #define LPF_FREQUENCY_MIN 20
 #define LPF_FREQUENCY_MAX 255
 #define LPF_RESONANCE_MIN 0
-#define LPF_RESONANCE_MAX 170
+#define LPF_RESONANCE_MAX 220
 
 // Envelope
 #define ENV_AMOUNT_MIN 0

@@ -11,7 +11,7 @@
 // Global Constants
 #include "Constants.h"
 //#define SERIAL_DEBUG // Enable Debugging
-#define CONTROL_RATE 256 // Defaults to 64
+#define CONTROL_RATE 64
 
 // Libraries
 #ifndef SERIAL_DEBUG
@@ -176,6 +176,7 @@ void updateVoiceControl(uint8_t key, uint16_t value) {
             voice.setLfoFrequency(value);
             break;
         case LFO_DESTINATION_KEY:
+            voice.setLfoDestination((uint8_t)value);
             break;
 
         case LPF_FREQUENCY_KEY:
